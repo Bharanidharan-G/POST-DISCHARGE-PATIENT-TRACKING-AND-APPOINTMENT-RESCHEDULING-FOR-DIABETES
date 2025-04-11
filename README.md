@@ -6,3 +6,5 @@
 # PROJECT OVERVIEW
   The suggested method uses infrared light to test blood sugar levels without intrusive procedures. Through the use of signal processing and calibration procedures, the IR transmitter and receiver module processes transmitted or reflected signals to determine the glucose concentration. For data logging, visualization, and analysis, a WiFi-enabled NodeMCU sends the processed data to the cloud using the ThingSpeak platform. Better disease management is made possible via cloud integration, which enables consumers and medical experts to monitor glucose trends over time.
   By combining cloud computing, healthcare apps, and reasonably priced hardware, this concept lessens the need for intrusive blood-based monitoring methods. Real-time data access is made possible by the integration of IoT, guaranteeing scalability, dependability, and better healthcare results. This system is a prime example of how IoT advancements may transform healthcare by promoting communication between patients and medical professionals, improving disease management, and raising people's quality of life globally.
+# HARDWARE DESCRIPTION
+## NodeMCU ESP8266:

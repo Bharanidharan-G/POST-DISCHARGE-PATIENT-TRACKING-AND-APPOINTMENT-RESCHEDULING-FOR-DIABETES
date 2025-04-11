@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLUCOSE MONITORING</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-image: url('hos.jpg'); /* Replace with your image path */
+            background-size: cover; /* Ensures the image covers the entire page */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Prevents image repetition */
+            height: 100vh; /* Full height */
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 45%;
+            min-width: 300px;
+            text-align: center;
+        }
+        h1{
+            color: black;
+            text-align: center;
+        }
+
+        h2 {
+            color: black;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f7971e;
+            color: white;
+            font-size: 18px;
+        }
+
+        td {
+            font-size: 16px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        input[type="submit"] {
+            background-color: #f7971e;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #d67b00;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>HOSPITAL WEB PAGE</h1>
+    <div class="container">
+        <div class="card">
+            <table>
+                <tr><th>GLUCOSE LEVEL</th></tr>
+                <tr id="dataRow"><td>Loading...</td></tr>
+            </table>
+        </div>
+        <div class="card">
+            <form id="appointmentForm">
+                <table>
+                    <tr><th><label for="appointmentTime">Appointment Date & Time:</label></th></tr>
+                    <td>
+                        <input type="datetime-local" id="appointmentTime" name="appointmentTime">
+                        <input type="submit" value="Submit">
+                    </td>
+                </table>
+            </form>
+        </div>
+        <div class="card">
+            <form id="prescriptionForm">
+                <table>
+                <tr><th><label for="prescription">QUERY</label></th></tr>
+                <td><textarea id="prescription" name="prescription" rows="4"></textarea></td>
+                </table>
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+        <div class="card">
+            <table id="prescriptionTable">
+                <tr><th>APPOINTMENT STATUS</th></tr>
+                <tr id="prescriptionRow"><td>Loading...</td></tr>
+            </table>
+        </div>
+    </div>
+    <script>
+        const channelId = '1702429';
+        const apiKey = '2T8FULYV3CDN4FR6';
+        const dataRow = document.getElementById('dataRow');
+
+        // Fetch Glucose Data
+        fetch(`https://api.thingspeak.com/channels/${channelId}/feeds.json?api_key=${apiKey}`)
+            .then(response => response.json())
+            .then(data => {
+                const latestEntry = data.feeds[data.feeds.length - 1];
+                const glucoseValue = latestEntry.field3;
+
+                dataRow.innerHTML = `<td>${glucoseValue}</td>`;
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                dataRow.innerHTML = '<td>Error loading data</td>';
+            });    
+
+        // Appointment Form Submission
+        document.getElementById('appointmentForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const appointmentTime = document.getElementById('appointmentTime').value;
+            if (appointmentTime) {
+                submitAppointmentTime(appointmentTime);
+            } else {
+                alert("Please select an appointment time.");
+            }
+        });
+
+        function submitAppointmentTime(time) {
+            const appointmentApiKey = 'JCGIQXLYPHRBI1R2';
+
+            fetch(`https://api.thingspeak.com/update.json?api_key=${appointmentApiKey}&field1=${encodeURIComponent(time)}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Appointment time set successfully:', data);
+                alert('Appointment time set successfully!');
+            })
+            .catch(error => {
+                console.error('Error setting appointment time:', error);
+                alert('Error setting appointment time. Please try again.');
+            });
+        }
+
+        // Prescription Form Submission
+        document.getElementById('prescriptionForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const prescription = document.getElementById('prescription').value;
+            submitPrescription(prescription);
+        });
+
+        function submitPrescription(prescription) {
+            const prescriptionApiKey = 'HQCDJX7DIRQZR992';
+
+            fetch(`https://api.thingspeak.com/update.json?api_key=${prescriptionApiKey}&field1=${encodeURIComponent(prescription)}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Query submitted successfully:', data);
+                alert('Query submitted successfully!');
+            })
+            .catch(error => {
+                console.error('Error submitting query:', error);
+                alert('Error submitting query. Please try again.');
+            });
+        }
+
+        // Fetch Appointment Status
+        const prescriptionChannelId = '596974';
+        fetch(`https://api.thingspeak.com/channels/${prescriptionChannelId}/feeds.json`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.feeds && data.feeds.length > 0) {
+                    const latestEntry = data.feeds[data.feeds.length - 1];
+                    const prescription = latestEntry.field1;
+
+                    document.getElementById('prescriptionRow').innerHTML = `<td>${prescription}</td>`;
+                } else {
+                    console.error('No prescription data found.');
+                    document.getElementById('prescriptionRow').innerHTML = '<td>No prescription data found.</td>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching prescription data:', error);
+                document.getElementById('prescriptionRow').innerHTML = '<td>Error loading prescription data</td>';
+            });
+    </script>
+</body>
+
+</html>

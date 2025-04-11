@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLUCOSE MONITORING</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-image: url('hos.jpg'); /* Replace with your image path */
+            background-size: cover; /* Ensures the image covers the entire page */
+            background-position: center; /* Centers the image */
+            background-repeat: no-repeat; /* Prevents image repetition */
+            height: 100vh; /* Full height */
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        h1, h2 {
+            color: black;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 20px;
+            text-align: center;
+            flex: 1 1 300px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>GLUCOSE MONITORING</h1>
+    <div class="container">
+        <div class="card">
+            <h2>Glucose Levels</h2>
+            <table>
+                <tr>
+                    <th>Value</th>
+                    <th>Status</th>
+                </tr>
+                <tr id="dataRow">
+                    <td colspan="2">Loading...</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Diet Recommendations</h2>
+            <p id="dietAdvice">Loading...</p>
+        </div>
+
+        <div class="card">
+            <h2>Appointment Time</h2>
+            <table>
+                <tr>
+                    <th>Time</th>
+                </tr>
+                <tr id="timeRow">
+                    <td>Loading...</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Query</h2>
+            <table>
+                <tr>
+                    <th>Query</th>
+                </tr>
+                <tr id="prescriptionRow">
+                    <td>Loading...</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    
+    <button id="submitButton">Book Appointment</button>
+    
+    <script>
+        const channelId = '1702429';
+        const apiKey = '2T8FULYV3CDN4FR6';
+
+        const dataRow = document.getElementById('dataRow');
+
+        // Fetch glucose data
+        fetch(`https://api.thingspeak.com/channels/${channelId}/feeds.json?api_key=${apiKey}`)
+            .then(response => response.json())
+            .then(data => {
+                const latestEntry = data.feeds[data.feeds.length - 1];
+                const glucoseValue = parseFloat(latestEntry.field3); // Convert to number
+
+                // Check if glucose is normal or abnormal
+                let status = glucoseValue >= 80 && glucoseValue <= 120 ? "Normal" : "Abnormal";
+
+                // Display glucose value and status
+                dataRow.innerHTML = `
+                    <td>${glucoseValue}</td>
+                    <td><b>${status}</b></td>
+                `;
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                dataRow.innerHTML = '<td colspan="2">Error loading data</td>';
+            });
+
+
+        function getDietRecommendation(glucoseValue) {
+            if (glucoseValue < 80) {
+                return "Eat more whole grains, fruits, and proteins to increase blood sugar levels.";
+            } else if (glucoseValue > 120) {
+                return "Reduce sugar intake, eat more fiber, and drink plenty of water.";
+            } else {
+                return "Maintain a balanced diet with proteins, vegetables, and whole grains.";
+            }
+        }
+
+        fetch(`https://api.thingspeak.com/channels/${channelId}/feeds.json?api_key=${apiKey}`)
+            .then(response => response.json())
+            .then(data => {
+                const latestEntry = data.feeds[data.feeds.length - 1];
+                const glucoseValue = parseFloat(latestEntry.field3);
+                document.getElementById("dietAdvice").innerText = getDietRecommendation(glucoseValue);
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+                document.getElementById("dietAdvice").innerText = "Error loading diet recommendations.";
+            });
+        // Appointment Booking
+        document.getElementById('submitButton').addEventListener('click', function () {
+        const name = "Bharani";
+        const age = "20";
+        const weight = "48kg";
+        const prescriptionData = `Name: ${name},
+        Age: ${age},
+        Weight: ${weight}`;
+        submitPrescription(prescriptionData);
+});
+
+
+
+
+        function submitPrescription(prescription) {
+            const prescriptionApiKey = 'ZKD2A60PEXQ13T8U';
+
+            fetch(`https://api.thingspeak.com/update.json?api_key=${prescriptionApiKey}&field1=${encodeURIComponent(prescription)}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Appointment booked successfully:', data);
+                alert('Appointment booked successfully!');
+            })
+            .catch(error => {
+                console.error('Error booking appointment:', error);
+                alert('Error booking appointment. Please try again.');
+            });
+        }
+        const timeChannelId = '2864802';
+        const apiKey2 ='W4277222PXOWVY58'
+        fetch(`https://api.thingspeak.com/channels/${timeChannelId}/feeds.json?api_key=${apiKey2}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.feeds && data.feeds.length > 0) {
+                    const timeEntry = data.feeds[data.feeds.length - 1];
+                    const timescr = timeEntry.field1;
+
+                    document.getElementById('timeRow').innerHTML = `<td>${timescr}</td>`;
+                } else {
+                    console.error('No time data found.');
+                    document.getElementById('timeRow').innerHTML = '<td>No time data found.</td>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching time data:', error);
+                document.getElementById('timeRow').innerHTML = '<td>Error loading prescription data</td>';
+            });
+
+        // Fetch latest query (prescription data)
+        const prescriptionChannelId = '985835';
+        fetch(`https://api.thingspeak.com/channels/${prescriptionChannelId}/feeds.json`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.feeds && data.feeds.length > 0) {
+                    const latestEntry = data.feeds[data.feeds.length - 1];
+                    const prescr = latestEntry.field1;
+
+                    document.getElementById('prescriptionRow').innerHTML = `<td>${prescr}</td>`;
+                } else {
+                    console.error('No prescription data found.');
+                    document.getElementById('prescriptionRow').innerHTML = '<td>No prescription data found.</td>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching prescription data:', error);
+                document.getElementById('prescriptionRow').innerHTML = '<td>Error loading prescription data</td>';
+            });
+    </script>
+</body>
+
+</html>

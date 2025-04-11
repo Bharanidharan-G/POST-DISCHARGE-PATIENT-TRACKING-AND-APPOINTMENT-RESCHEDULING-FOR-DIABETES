@@ -26,7 +26,9 @@ create channels where data from devices can be sent and accessed through the clo
 ## JavaScript:
  JavaScript is a powerful, high-level programming language mainly used to create interactive and dynamic content on websites. It runs directly in the browser and allows developers to handle user actions, manipulate HTML and CSS, and communicate with servers without reloading the page. JavaScript supports features like functions, objects, and asynchronous programming, making it essential for modern web development. It's also widely used with libraries like jQuery and frameworks like React, Angular, and Vue to build scalable and efficient web applications.
 
+# HARWARE SETUP
 
+# WEB PAGE
 
 
 

@@ -1,0 +1,26 @@
+#include "ESP_Wahaj.h"
+#include "ThingSpeak.h"
+int pwm = 0;
+String na = "";
+int ag = 0;
+int glucose = 0;
+void setup()
+{
+  pinMode(A0, INPUT);
+  Serial.begin(9600);
+  ThingSpeak.begin(client);
+  start("Project", "12345678");
+}
+void loop()
+{
+  for (int k = 0; k < 60; k++)
+  {
+    int ui = analogRead(A0);
+    glucose = ui + glucose;
+    delay(250);
+  }
+  glucose = glucose / 139;
+  Serial.println(glucose);
+  ThingSpeak.setField(3, glucose);
+  int xuk = ThingSpeak.writeFields(1702429, "HA2N0K0ZVSLURSBI");
+}
